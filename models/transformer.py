@@ -1,7 +1,5 @@
-
 import torch
 import torch.nn as nn
-
 
 class AF2BindTransformer(nn.Module):
 
@@ -39,8 +37,7 @@ class AF2BindTransformer(nn.Module):
 
     def forward(self, x):
 
-        # x shape:
-        # (batch, L, 2560)
+        # x: (batch, L, 2560)
 
         x = self.input_proj(x)
 
