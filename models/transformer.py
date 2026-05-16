@@ -2,14 +2,17 @@
 import torch
 import torch.nn as nn
 
-class AF2Transformer(nn.Module):
 
-    def __init__(self,
-                 input_dim=128,
-                 hidden_dim=256,
-                 num_heads=8,
-                 num_layers=4):
+class AF2BindTransformer(nn.Module):
 
+    def __init__(
+        self,
+        input_dim=2560,
+        hidden_dim=256,
+        num_heads=8,
+        num_layers=2,
+        dropout=0.1
+    ):
         super().__init__()
 
         self.input_proj = nn.Linear(input_dim, hidden_dim)
@@ -17,6 +20,7 @@ class AF2Transformer(nn.Module):
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=hidden_dim,
             nhead=num_heads,
+            dropout=dropout,
             batch_first=True
         )
 
@@ -25,19 +29,23 @@ class AF2Transformer(nn.Module):
             num_layers=num_layers
         )
 
-        self.classifier = nn.Linear(hidden_dim, 1)
+        self.classifier = nn.Sequential(
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(hidden_dim, 1),
+            nn.Sigmoid()
+        )
 
     def forward(self, x):
 
         # x shape:
-        # (B,L,L,C)
-
-        x = x.mean(dim=2)
+        # (batch, L, 2560)
 
         x = self.input_proj(x)
 
         x = self.transformer(x)
 
-        x = self.classifier(x)
+        out = self.classifier(x)
 
-        return torch.sigmoid(x).squeeze(-1)
+        return out.squeeze(-1)
