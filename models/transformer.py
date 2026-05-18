@@ -5,7 +5,7 @@ class AF2BindTransformer(nn.Module):
 
     def __init__(
         self,
-        input_dim=2560,
+        input_dim=5120,
         hidden_dim=256,
         num_heads=8,
         num_layers=2,
